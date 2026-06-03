@@ -67,7 +67,16 @@ public class AuthServiceTest {
     @BeforeEach
     void setUp() {
         UUID userId = UUID.randomUUID();
-        mockedUserEntity = User.createRegisteredUser("John Doe", "johndoe@gmail.com", "$2a$10$encodedPasswordHash");
+        mockedUserEntity = User.builder()
+                               .name("John Doe")
+                               .email("johndoe@gmail.com")
+                               .password("$2a$10$encodedPasswordHash")
+                               .role(Role.USER)
+                               .active(true)
+                               .createdAt(Instant.now())
+                               .updatedAt(Instant.now())
+                               .lastAccessedAt(Instant.now())
+                               .build();
 
         mockedUserResponseDTO = new UserResponseDTO(
                 userId,
