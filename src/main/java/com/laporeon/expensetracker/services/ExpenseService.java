@@ -5,6 +5,7 @@ import com.laporeon.expensetracker.dtos.request.UpdateExpenseRequestDTO;
 import com.laporeon.expensetracker.dtos.response.ExpenseResponseDTO;
 import com.laporeon.expensetracker.dtos.response.PageResponseDTO;
 import com.laporeon.expensetracker.entities.Expense;
+import com.laporeon.expensetracker.enums.Category;
 import com.laporeon.expensetracker.exceptions.ResourceNotFoundException;
 import com.laporeon.expensetracker.helpers.SecurityUtils;
 import com.laporeon.expensetracker.mappers.ExpenseMapper;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -72,10 +74,20 @@ public class ExpenseService {
         Expense expense = expenseRepository.findByIdAndUserId(id, SecurityUtils.getCurrentUserId())
                                            .orElseThrow(() -> new ResourceNotFoundException("Expense with id '%s' not found".formatted(id)));
 
-        expense.update(dto);
+        updateFields(dto, expense);
         expenseRepository.save(expense);
 
         return expenseMapper.toDTO(expense);
+    }
+
+    private void updateFields(UpdateExpenseRequestDTO dto, Expense expense) {
+        if (dto.name() != null) expense.setName(dto.name());
+        if (dto.description() != null) expense.setDescription(dto.description());
+        if (dto.amount() != null) expense.setAmount(dto.amount());
+        if (dto.category() != null) expense.setCategory(Category.fromString(dto.category()));
+        if (dto.date() != null) expense.setDate(dto.date());
+
+        expense.setUpdatedAt(Instant.now());
     }
 
 }
