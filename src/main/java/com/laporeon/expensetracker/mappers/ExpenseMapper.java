@@ -8,20 +8,23 @@ import com.laporeon.expensetracker.enums.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Component
 public class ExpenseMapper {
 
     public Expense toEntity(CreateExpenseRequestDTO dto, UUID userId) {
-        return Expense.create(
-                dto.name(),
-                dto.description(),
-                dto.amount(),
-                Category.fromString(dto.category()),
-                userId,
-                dto.date()
-        );
+        return Expense.builder()
+                      .name(dto.name())
+                      .description(dto.description())
+                      .amount(dto.amount())
+                      .category(Category.fromString(dto.category()))
+                      .userId(userId)
+                      .date(dto.date())
+                      .createdAt(Instant.now())
+                      .updatedAt(Instant.now())
+                      .build();
     }
 
     public ExpenseResponseDTO toDTO(Expense expense) {

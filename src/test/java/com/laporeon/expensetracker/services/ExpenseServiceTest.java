@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -65,13 +66,16 @@ public class ExpenseServiceTest {
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
-        mockedExpenseEntity = Expense.create(
-                "Prime Video",
-                "Prime Video annual subscription.",
-                BigDecimal.valueOf(199.90),
-                Category.SUBSCRIPTIONS,
-                userId,
-                LocalDate.of(2025, 12, 18));
+        mockedExpenseEntity = Expense.builder()
+                      .name("Prime Video")
+                      .description("Prime Video annual subscription.")
+                      .amount(BigDecimal.valueOf(199.90))
+                      .category(Category.SUBSCRIPTIONS)
+                      .userId(userId)
+                      .date(LocalDate.of(2025, 12, 18))
+                      .createdAt(Instant.now())
+                      .updatedAt(Instant.now())
+                      .build();
 
 
         mockedExpenseResponse = new ExpenseResponseDTO(

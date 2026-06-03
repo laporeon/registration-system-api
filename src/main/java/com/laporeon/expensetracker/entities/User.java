@@ -1,6 +1,5 @@
 package com.laporeon.expensetracker.entities;
 
-import com.laporeon.expensetracker.dtos.request.UpdateUserRequestDTO;
 import com.laporeon.expensetracker.enums.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,11 +12,12 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
@@ -27,10 +27,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-@Getter
+@Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder(access = AccessLevel.PRIVATE)
+@Builder
 public class User implements UserDetails {
 
     @Id
@@ -52,7 +52,7 @@ public class User implements UserDetails {
     private Role role;
 
     @Column(name = "is_active", nullable = false)
-    private boolean isActive;
+    private boolean active;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -63,53 +63,22 @@ public class User implements UserDetails {
     @Column(name = "last_accessed_at", nullable = false)
     private Instant lastAccessedAt;
 
-    public static User createRegisteredUser(String name, String email, String encodedPassword) {
-        Instant now = Instant.now();
-        return User.builder()
-                   .name(name)
-                   .email(email)
-                   .password(encodedPassword)
-                   .role(Role.USER)
-                   .isActive(true)
-                   .createdAt(now)
-                   .updatedAt(now)
-                   .lastAccessedAt(now)
-                   .build();
-    }
-
-    public void update(UpdateUserRequestDTO dto, String encodedPassword) {
-        if (dto.name() != null) this.name = dto.name();
-        if (dto.email() != null) this.email = dto.email();
-        if (encodedPassword != null) this.password = encodedPassword;
-        this.updatedAt = Instant.now();
-    }
-
-    public void deactivate() {
-        this.isActive = false;
-        this.updatedAt = Instant.now();
-    }
-
-    public void recordAccess(Instant at) {
-        this.lastAccessedAt = at;
-        this.updatedAt = Instant.now();
-    }
-
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() { return List.of(); }
+    public Collection<? extends GrantedAuthority> getAuthorities() { return List.of(new SimpleGrantedAuthority("ROLE_" + role.name())); }
 
     @Override
     public String getUsername() { return email; }
 
     @Override
-    public boolean isAccountNonExpired() { return isActive; }
+    public boolean isAccountNonExpired() { return active; }
 
     @Override
-    public boolean isAccountNonLocked() { return isActive; }
+    public boolean isAccountNonLocked() { return active; }
 
     @Override
-    public boolean isCredentialsNonExpired() { return isActive; }
+    public boolean isCredentialsNonExpired() { return active; }
 
     @Override
-    public boolean isEnabled() { return isActive; }
+    public boolean isEnabled() { return active; }
 
 }

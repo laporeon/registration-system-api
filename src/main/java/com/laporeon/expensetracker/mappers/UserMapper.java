@@ -3,9 +3,12 @@ package com.laporeon.expensetracker.mappers;
 import com.laporeon.expensetracker.dtos.request.RegisterRequestDTO;
 import com.laporeon.expensetracker.dtos.response.UserResponseDTO;
 import com.laporeon.expensetracker.entities.User;
+import com.laporeon.expensetracker.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -14,11 +17,18 @@ public class UserMapper {
     private final PasswordEncoder passwordEncoder;
 
     public User toEntity(RegisterRequestDTO dto) {
-        return User.createRegisteredUser(
-                dto.name(),
-                dto.email(),
-                passwordEncoder.encode(dto.password())
-        );
+        Instant now = Instant.now();
+
+        return User.builder()
+                   .name(dto.name())
+                   .email(dto.email())
+                   .password(passwordEncoder.encode(dto.password()))
+                   .role(Role.USER)
+                   .active(true)
+                   .createdAt(now)
+                   .updatedAt(now)
+                   .lastAccessedAt(now)
+                   .build();
     }
 
     public UserResponseDTO toResponseDTO(User user) {

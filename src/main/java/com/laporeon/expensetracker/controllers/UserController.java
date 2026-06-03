@@ -18,7 +18,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
@@ -61,7 +66,7 @@ public class UserController {
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
-    @PreAuthorize("#id == authentication.principal.id")
+    @PreAuthorize("#id.equals(authentication.principal.id) or hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> update(@PathVariable("id") UUID id, @Valid @RequestBody UpdateUserRequestDTO dto) {
         UserResponseDTO response = userService.update(id, dto);
@@ -74,7 +79,7 @@ public class UserController {
             description = "Deletes an existing users by its ID.",
             responses = {
                     @ApiResponse(responseCode = "204", description = "User successfully deleted"),
-                    @ApiResponse(responseCode = "403", description = "Access dened",
+                    @ApiResponse(responseCode = "403", description = "Access denied",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.UNAUTHORIZED_ERROR))),
@@ -87,9 +92,9 @@ public class UserController {
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
-    @PreAuthorize("#id == authentication.principal.id")
+    @PreAuthorize("#id.equals(authentication.principal.id) or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpense(@PathVariable("id") UUID id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") UUID id) {
         userService.deleteUser(id);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

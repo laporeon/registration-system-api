@@ -51,7 +51,7 @@ public class AuthService {
 
         String token = jwtTokenProvider.generateToken(user);
 
-        user.recordAccess(Instant.now());
+        user.setLastAccessedAt(Instant.now());
         userRepository.save(user);
 
         return new LoginResponseDTO(
